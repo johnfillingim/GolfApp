@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+DerivedData/
+build/
+
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# Env / secrets
+*.env
