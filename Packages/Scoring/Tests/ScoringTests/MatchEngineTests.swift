@@ -74,16 +74,20 @@ final class MatchEngineTests: XCTestCase {
     }
 
     func testPendingHoleKeepsMatchOpen() {
-        // Jack 1 up, but hole 2 unscored for Jill: 1 up with 1 "remaining"
-        // is NOT closed — Jill could still halve the match via hole 2.
+        // Jack 1 up, but hole 2 unscored for Jill: 1 up with 1 undecided
+        // hole is NOT closed — Jill could still halve the match by winning
+        // hole 2 once it's filled in. It is, however, dormie: Jack can no
+        // longer lose.
         var jill: [Int?] = Array(repeating: 4, count: 9)
         jill[1] = nil
         let comp = compute(jack: Array(repeating: 4, count: 9).optional.replacing(at: 0, with: 3), jill: jill.replacing(at: 0, with: 4))
         XCTAssertEqual(comp.status.upA, 1)
         XCTAssertEqual(comp.status.remaining, 1)
         XCTAssertFalse(comp.status.closed)
+        XCTAssertNil(comp.status.winner)
         XCTAssertEqual(comp.pendingHoles, [2])
-        XCTAssertEqual(comp.status.display, "1 UP thru 9")
+        XCTAssertEqual(comp.status.dormieSide, .a)
+        XCTAssertEqual(comp.status.display, "Dormie 1")
     }
 
     func testBestBallNeedsAllScoresBeforeDeciding() {
