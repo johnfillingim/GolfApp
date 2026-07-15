@@ -1,0 +1,19 @@
+name: Scoring Tests
+
+# The Scoring package is pure Swift with no Apple-framework dependencies,
+# so the betting math runs (and is verified) on Linux. UI builds still
+# require Xcode on a Mac runner and are out of scope for this workflow.
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: swift test (Scoring)
+    runs-on: ubuntu-latest
+    container: swift:6.0-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Scoring unit tests
+        run: swift test --package-path Packages/Scoring
