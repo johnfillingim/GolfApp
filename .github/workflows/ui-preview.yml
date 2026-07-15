@@ -16,30 +16,47 @@ on:
 
 jobs:
   screenshot:
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show Xcode version
-        run: xcodebuild -version
+      # The project is authored at pbxproj objectVersion 77, which only
+      # Xcode 16+ can open. Runner images ship several Xcode versions
+      # side by side (older default varies over time), so pick the
+      # newest installed one explicitly rather than trust the default.
+      - name: Select newest available Xcode
+        run: |
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$LATEST" ]; then LATEST="/Applications/Xcode.app"; fi
+          echo "Selecting $LATEST"
+          sudo xcode-select -s "$LATEST"
+          xcodebuild -version
 
       - name: Resolve Swift package
         run: xcodebuild -resolvePackageDependencies -workspace Birdie.xcworkspace -scheme Birdie
+
+      - name: List available simulators
+        run: xcrun simctl list devices available
 
       - name: Build for iOS Simulator
         run: |
           xcodebuild build \
             -workspace Birdie.xcworkspace \
             -scheme Birdie \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 
       - name: Boot simulator, install, launch, screenshot
         run: |
           set -eo pipefail
-          UDID=$(xcrun simctl list devices available | grep -m1 'iPhone 15 (' | grep -oE '[0-9A-F-]{36}')
+          # Prefer a recent iPhone if present, else take the first
+          # available iPhone simulator the runner image happens to ship.
+          UDID=$(xcrun simctl list devices available | grep -E 'iPhone (1[5-9]|[2-9][0-9])' -m1 | grep -oE '[0-9A-F-]{36}' || true)
+          if [ -z "$UDID" ]; then
+            UDID=$(xcrun simctl list devices available | grep -m1 'iPhone' | grep -oE '[0-9A-F-]{36}')
+          fi
           echo "Using simulator $UDID"
           xcrun simctl boot "$UDID"
           xcrun simctl bootstatus "$UDID" -b
