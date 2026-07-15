@@ -1,0 +1,65 @@
+name: iOS Simulator Preview
+
+# Builds the app on a free GitHub-hosted macOS runner, boots the iOS
+# Simulator, launches Birdie, and uploads a screenshot as a workflow
+# artifact. This is how the app can be previewed without owning a Mac.
+on:
+  workflow_dispatch:
+  push:
+    branches: ["claude/golf-betting-ios-app-2re6wq"]
+    paths:
+      - "Birdie/**"
+      - "Birdie.xcodeproj/**"
+      - "Birdie.xcworkspace/**"
+      - "Packages/Scoring/**"
+      - ".github/workflows/ui-preview.yml"
+
+jobs:
+  screenshot:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Resolve Swift package
+        run: xcodebuild -resolvePackageDependencies -workspace Birdie.xcworkspace -scheme Birdie
+
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild build \
+            -workspace Birdie.xcworkspace \
+            -scheme Birdie \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+      - name: Boot simulator, install, launch, screenshot
+        run: |
+          set -eo pipefail
+          UDID=$(xcrun simctl list devices available | grep -m1 'iPhone 15 (' | grep -oE '[0-9A-F-]{36}')
+          echo "Using simulator $UDID"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+
+          APP_PATH=$(find build -name "Birdie.app" -path "*iphonesimulator*" | head -1)
+          echo "App at $APP_PATH"
+          xcrun simctl install "$UDID" "$APP_PATH"
+          xcrun simctl launch "$UDID" com.example.birdie
+
+          mkdir -p screenshots
+          sleep 6
+          xcrun simctl io "$UDID" screenshot screenshots/01-launch.png
+
+          # Best-effort second screenshot after enough time for any
+          # animation/transition to settle.
+          sleep 4
+          xcrun simctl io "$UDID" screenshot screenshots/02-settled.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: birdie-preview-screenshots
+          path: screenshots/*.png
+          retention-days: 14
