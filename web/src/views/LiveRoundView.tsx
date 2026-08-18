@@ -65,7 +65,7 @@ export function LiveRoundView({
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Hole header */}
-      <header className="safe-top px-4 pb-3 border-b border-stroke shrink-0">
+      <header className="safe-top px-4 pb-3 border-b border-stroke shrink-0 bg-violet-hero">
         {/* Installed to the home screen there is no browser chrome, so the way
             back out of a round has to live in the app itself. */}
         <div className="flex items-center justify-between gap-3 mb-1">
@@ -162,7 +162,7 @@ export function LiveRoundView({
                   type="button"
                   aria-label={`Increase ${player.name}'s score`}
                   onClick={() => session.adjustStrokes(player.id, currentHole, 1)}
-                  className="tap flex-1 rounded-button bg-fairway text-text-onAccent text-title active:scale-[0.97] transition-transform"
+                  className="tap flex-1 rounded-button bg-violet-tile text-text-onAccent text-title shadow-glow active:scale-[0.97] active:shadow-none transition-transform"
                 >
                   +
                 </button>
@@ -239,14 +239,14 @@ function WolfPrompt({
         <button
           type="button"
           onClick={() => session.declareWolf(bet.id, hole, wolf.id, { type: 'lone' })}
-          className="tap px-3 py-2 rounded-chip bg-fairway text-text-onAccent text-body font-semibold"
+          className="tap px-3 py-2 rounded-chip bg-primary text-text-onAccent text-body font-semibold"
         >
           Lone wolf
         </button>
         <button
           type="button"
           onClick={() => session.declareWolf(bet.id, hole, wolf.id, { type: 'blindLone' })}
-          className="tap px-3 py-2 rounded-chip bg-gold text-text-onAccent text-body font-semibold"
+          className="tap px-3 py-2 rounded-chip bg-gold text-text-onBright text-body font-semibold"
         >
           Blind
         </button>

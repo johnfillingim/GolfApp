@@ -18,8 +18,8 @@ export default defineConfig({
         short_name: 'Birdie',
         description:
           'Track side bets, live standings, and settle-up for your golf round.',
-        theme_color: '#0A0F0D',
-        background_color: '#0A0F0D',
+        theme_color: '#0B0912',
+        background_color: '#0B0912',
         display: 'standalone',
         orientation: 'portrait',
         start_url: BASE,

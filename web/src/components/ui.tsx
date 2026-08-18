@@ -42,7 +42,8 @@ export function Button({
     lg: 'px-6 py-4 text-title w-full',
   };
   const variants = {
-    primary: 'bg-fairway text-text-onAccent active:bg-fairway-pressed',
+    primary:
+      'bg-violet-tile text-text-onAccent shadow-glow active:bg-primary-pressed active:shadow-none',
     secondary: 'bg-raised text-text-primary border border-stroke',
     ghost: 'text-text-secondary',
     danger: 'bg-raised text-down border border-down/40',
@@ -115,7 +116,7 @@ export function Chip({
   className?: string;
 }) {
   const selectedClass = selected
-    ? 'bg-fairway text-text-onAccent border-fairway'
+    ? 'bg-primary text-text-onAccent border-primary'
     : 'bg-raised text-text-secondary border-stroke';
   return (
     <button
@@ -154,7 +155,7 @@ export function Toggle({
       </span>
       <span
         className={`shrink-0 w-12 h-7 rounded-full transition-colors relative ${
-          checked ? 'bg-fairway' : 'bg-stroke'
+          checked ? 'bg-primary' : 'bg-stroke'
         }`}
       >
         <span
@@ -203,7 +204,7 @@ export function Screen({
 }) {
   return (
     <div className="flex flex-col h-full bg-background">
-      <header className="safe-top px-4 pb-3 flex items-center gap-3 border-b border-stroke shrink-0">
+      <header className="safe-top px-4 pb-4 flex items-center gap-3 border-b border-stroke shrink-0 bg-violet-hero">
         {onBack && (
           <button
             type="button"

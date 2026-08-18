@@ -154,7 +154,7 @@ export function BetBuilder({
           >
             <span
               className={`shrink-0 w-5 h-5 rounded-full border-2 ${
-                format === option.type ? 'bg-fairway border-fairway' : 'border-stroke'
+                format === option.type ? 'bg-primary border-primary' : 'border-stroke'
               }`}
               aria-hidden="true"
             />

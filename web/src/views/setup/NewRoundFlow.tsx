@@ -124,7 +124,7 @@ export function NewRoundFlow({
                 <span
                   className={`shrink-0 w-5 h-5 rounded-full border-2 ${
                     course.id === option.id
-                      ? 'bg-fairway border-fairway'
+                      ? 'bg-primary border-primary'
                       : 'border-stroke'
                   }`}
                   aria-hidden="true"
@@ -301,7 +301,7 @@ function PlayersStep({
                     <span
                       className={`shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-caption tnum ${
                         position >= 0
-                          ? 'bg-fairway border-fairway text-text-onAccent'
+                          ? 'bg-primary border-primary text-text-onAccent'
                           : 'border-stroke text-transparent'
                       }`}
                     >
@@ -347,7 +347,7 @@ function PlayersStep({
                 type="button"
                 onClick={() => setEmoji(choice)}
                 className={`w-11 h-11 rounded-chip border text-title ${
-                  emoji === choice ? 'border-fairway bg-fairway/20' : 'border-stroke'
+                  emoji === choice ? 'border-primary bg-primary/20' : 'border-stroke'
                 }`}
               >
                 {choice}

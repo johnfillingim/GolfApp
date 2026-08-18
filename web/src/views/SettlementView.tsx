@@ -85,7 +85,7 @@ export function SettlementView({
                     <span
                       className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-caption ${
                         paid
-                          ? 'bg-fairway border-fairway text-text-onAccent'
+                          ? 'bg-primary border-primary text-text-onAccent'
                           : 'border-stroke text-transparent'
                       }`}
                       aria-hidden="true"

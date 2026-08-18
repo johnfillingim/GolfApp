@@ -1,15 +1,15 @@
 /** @type {import('tailwindcss').Config} */
-// Design tokens ported from Theme.swift. One place owns every color, radius,
-// and spring in the app.
+// Design tokens. One place owns every color, radius, and spring in the app.
 //
-// Principles carried over from the iOS build:
-// - Dark, premium, sporty: near-black with a green cast (never pure #000),
-//   deep fairway green as the brand anchor, electric lime reserved for MONEY
-//   and WINS so it stays special, muted coral for "down" (red-green
-//   colorblind-safer than pure red against green).
+// The palette is a dark violet system in the PrizePicks vein: a near-black
+// ground with a purple undertone, a vivid violet as the brand anchor, and
+// electric lime reserved for MONEY and WINS so it always earns attention.
+// Principles inherited from the original SwiftUI build still hold:
+// - Never pure #000 — it kills depth and smears on OLED.
 // - Outdoor legibility is a hard requirement: body text >= 17px, no
 //   informational text below 60% white, hit targets >= 48px for gloved thumbs
-//   in sunlight.
+//   in sunlight. Violet is darker than the old green, so text on surfaces was
+//   re-checked for contrast rather than assumed.
 // - Scores are numbers in motion: rounded design + tabular digits so steppers
 //   don't jitter.
 export default {
@@ -17,22 +17,34 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0A0F0D',
-        surface: '#141B18',
-        raised: '#1C2521',
-        stroke: '#2A3630',
-        fairway: {
-          DEFAULT: '#1F9D55',
-          pressed: '#177A41',
+        background: '#0B0912',
+        surface: '#151122',
+        raised: '#1F1830',
+        stroke: '#342A4A',
+        // Brand violet. Buttons, selected states, anything the thumb goes to.
+        primary: {
+          DEFAULT: '#7C3AED',
+          pressed: '#6926D9',
+          bright: '#A855F7',
         },
+        // Electric lime — money, wins, "up". Reads hot against violet and is
+        // the one color that never appears decoratively.
         money: '#B7F435',
-        down: '#FF7A6B',
-        neutral: '#93A69C',
-        gold: '#FFD34D',
+        // Losses, "down". Warm pink-red, not alarm-red, and distinguishable
+        // from violet for red-green colorblind viewers.
+        down: '#FF6B7A',
+        // Halved / neutral states.
+        neutral: '#9A90B8',
+        // Jackpot moments (ace, albatross).
+        gold: '#FBBF24',
         text: {
-          primary: '#F4F9F6',
-          secondary: '#AABBB2',
-          onAccent: '#07130C',
+          primary: '#F5F2FF',
+          secondary: '#B4A9D4',
+          // Violet is dark enough that its foreground is white, unlike the
+          // lime and green surfaces this palette replaced.
+          onAccent: '#FFFFFF',
+          // For the rare lime/gold fill, which needs a dark foreground.
+          onBright: '#140A24',
         },
       },
       borderRadius: {
@@ -62,12 +74,18 @@ export default {
         'money-lg': ['28px', { lineHeight: '1.1', fontWeight: '800' }],
         grid: ['15px', { lineHeight: '1.2', fontWeight: '600' }],
       },
-      minHeight: {
-        target: '48px',
+      backgroundImage: {
+        // Hero surfaces: a violet wash that lifts the top of a screen without
+        // costing legibility further down.
+        'violet-hero': 'linear-gradient(160deg, #3B1E6E 0%, #1B1230 55%, #0B0912 100%)',
+        'violet-tile': 'linear-gradient(145deg, #7C3AED 0%, #5B21B6 100%)',
       },
-      minWidth: {
-        target: '48px',
+      boxShadow: {
+        glow: '0 0 24px -4px rgba(124, 58, 237, 0.55)',
+        'glow-money': '0 0 24px -6px rgba(183, 244, 53, 0.45)',
       },
+      minHeight: { target: '48px' },
+      minWidth: { target: '48px' },
       keyframes: {
         'pop-in': {
           '0%': { transform: 'scale(0.86)', opacity: '0' },
@@ -78,13 +96,9 @@ export default {
           '0%': { transform: 'translateY(12px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
-        'fade-in': {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
+        'fade-in': { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
       },
       animation: {
-        // Roughly the three Swift springs: snappy, standard, celebratory.
         'pop-in': 'pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
         'slide-up': 'slide-up 0.42s cubic-bezier(0.22, 1, 0.36, 1)',
         'fade-in': 'fade-in 0.28s ease-out',

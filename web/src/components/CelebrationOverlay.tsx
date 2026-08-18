@@ -36,12 +36,14 @@ const TIER_PARTICLES: Record<CelebrationTier, number> = {
   jackpot: 180,
 };
 
+// Particle colors track the theme tokens: violet for the low tiers, lime
+// entering as the moment gets worth money, gold only at jackpot.
 const PALETTES: Record<CelebrationTier, string[]> = {
-  toast: ['#93A69C'],
-  minor: ['#93A69C', '#1F9D55'],
-  medium: ['#B7F435', '#1F9D55', '#F4F9F6'],
-  major: ['#B7F435', '#1F9D55', '#FFD34D', '#F4F9F6'],
-  jackpot: ['#FFD34D', '#B7F435', '#FFFFFF', '#1F9D55', '#FF7A6B'],
+  toast: ['#9A90B8'],
+  minor: ['#9A90B8', '#7C3AED'],
+  medium: ['#B7F435', '#7C3AED', '#F5F2FF'],
+  major: ['#B7F435', '#A855F7', '#FBBF24', '#F5F2FF'],
+  jackpot: ['#FBBF24', '#B7F435', '#FFFFFF', '#A855F7', '#FF6B7A'],
 };
 
 function prefersReducedMotion(): boolean {
@@ -133,7 +135,7 @@ const TIER_STYLE: Record<CelebrationTier, string> = {
   minor: 'bg-raised/95 border-stroke',
   medium: 'bg-raised/95 border-money/40',
   major: 'bg-raised/95 border-money/70',
-  jackpot: 'bg-gold/95 border-gold text-text-onAccent',
+  jackpot: 'bg-gold/95 border-gold text-text-onBright',
 };
 
 export function CelebrationOverlay({
@@ -175,14 +177,14 @@ export function CelebrationOverlay({
         </div>
         {celebration.subtitle && (
           <div
-            className={`text-caption mt-1 ${isJackpot ? 'text-text-onAccent/80' : 'text-text-secondary'}`}
+            className={`text-caption mt-1 ${isJackpot ? 'text-text-onBright/80' : 'text-text-secondary'}`}
           >
             {celebration.subtitle}
           </div>
         )}
         {money && (
           <div
-            className={`tnum text-money-lg mt-2 ${isJackpot ? 'text-text-onAccent' : 'text-money'}`}
+            className={`tnum text-money-lg mt-2 ${isJackpot ? 'text-text-onBright' : 'text-money'}`}
           >
             {money}
           </div>
