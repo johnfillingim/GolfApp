@@ -40,6 +40,7 @@ export function RoundContainer({
       {tab === 'play' && (
         <LiveRoundView
           session={session}
+          onExit={onExit}
           onOpenScorecard={() => setTab('card')}
           onOpenStandings={() => setTab('standings')}
           onOpenSettle={() => setTab('settle')}
@@ -54,7 +55,8 @@ export function RoundContainer({
       {tab === 'settle' && (
         <SettlementView
           session={session}
-          onBack={() => setTab(session.round.status === 'finished' ? 'card' : 'play')}
+          onBack={() => setTab('play')}
+          onExit={onExit}
           onFinish={() => {
             session.finishRound();
             onExit();

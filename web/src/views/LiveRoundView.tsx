@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Button, Card, MoneyText, standingColor } from '../components/ui';
+import { Button, Card, MoneyText } from '../components/ui';
 import { balanceOf, holeAt, type PlayerID } from '../scoring';
 import type { RoundSession } from '../state/useRoundSession';
 
@@ -35,11 +35,13 @@ function scoreColor(strokes: number | null, par: number): string {
 
 export function LiveRoundView({
   session,
+  onExit,
   onOpenScorecard,
   onOpenStandings,
   onOpenSettle,
 }: {
   session: RoundSession;
+  onExit: () => void;
   onOpenScorecard: () => void;
   onOpenStandings: () => void;
   onOpenSettle: () => void;
@@ -64,6 +66,21 @@ export function LiveRoundView({
     <div className="flex flex-col h-full bg-background">
       {/* Hole header */}
       <header className="safe-top px-4 pb-3 border-b border-stroke shrink-0">
+        {/* Installed to the home screen there is no browser chrome, so the way
+            back out of a round has to live in the app itself. */}
+        <div className="flex items-center justify-between gap-3 mb-1">
+          <button
+            type="button"
+            onClick={onExit}
+            className="tap -ml-2 px-2 text-caption text-text-secondary text-left"
+          >
+            ‹ Rounds
+          </button>
+          <span className="text-caption text-text-secondary truncate">
+            {round.course.name}
+          </span>
+        </div>
+
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
@@ -248,9 +265,7 @@ function BetHeadlines({ session }: { session: RoundSession }) {
           <div className="text-caption text-text-secondary uppercase tracking-wider">
             {evaluation.kindName}
           </div>
-          <div className={`text-body ${standingColor(0)} text-text-primary`}>
-            {evaluation.headline}
-          </div>
+          <div className="text-body text-text-primary">{evaluation.headline}</div>
         </div>
       ))}
     </Card>

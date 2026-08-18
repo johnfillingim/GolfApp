@@ -36,7 +36,9 @@ export default defineConfig({
             type: 'image/png',
           },
           {
-            src: 'icon-512.png',
+            // Separate art: Android's circular mask crops the full-bleed disc,
+            // so the maskable variant keeps everything inside the safe zone.
+            src: 'icon-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',

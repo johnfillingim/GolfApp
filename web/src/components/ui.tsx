@@ -167,53 +167,6 @@ export function Toggle({
   );
 }
 
-/** Row of the standings/leaderboard type: name on the left, value on the right. */
-export function Row({
-  leading,
-  title,
-  subtitle,
-  trailing,
-  onClick,
-  className = '',
-}: {
-  leading?: ReactNode;
-  title: ReactNode;
-  subtitle?: ReactNode;
-  trailing?: ReactNode;
-  onClick?: () => void;
-  className?: string;
-}) {
-  const content = (
-    <>
-      {leading && <span className="shrink-0 text-title">{leading}</span>}
-      <span className="min-w-0 flex-1">
-        <span className="block text-body text-text-primary truncate">{title}</span>
-        {subtitle && (
-          <span className="block text-caption text-text-secondary truncate">
-            {subtitle}
-          </span>
-        )}
-      </span>
-      {trailing && <span className="shrink-0">{trailing}</span>}
-    </>
-  );
-
-  if (onClick) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        className={`tap w-full flex items-center gap-3 px-4 py-3 text-left active:bg-raised transition-colors ${className}`}
-      >
-        {content}
-      </button>
-    );
-  }
-  return (
-    <div className={`flex items-center gap-3 px-4 py-3 ${className}`}>{content}</div>
-  );
-}
-
 export function EmptyState({
   emoji,
   title,

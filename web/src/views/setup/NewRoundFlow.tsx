@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { Button, Card, Chip, Screen, SectionTitle } from '../../components/ui';
-import {
-  COURSES,
-  courseInfoFrom,
-  totalPar,
-  totalYards,
-  type CatalogCourse,
-} from '../../data/courses';
+import { COURSES, totalPar, totalYards, type CatalogCourse } from '../../data/courses';
 import { saveProfile } from '../../data/db';
 import {
   playingHandicap,
@@ -368,5 +362,3 @@ function PlayersStep({
     </Screen>
   );
 }
-
-export { courseInfoFrom };

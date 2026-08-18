@@ -9,9 +9,9 @@
  * wrong field, standings reading settled instead of projected. That class of bug
  * passes every unit test and is obvious the moment a real round runs.
  */
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '../App';
 import { allProfiles, allRounds, deleteProfile, deleteRound } from '../data/db';
 
@@ -29,6 +29,11 @@ describe('Birdie app', () => {
   beforeEach(async () => {
     await clearDatabase();
   });
+
+  // Testing Library only auto-unmounts when the test framework's globals are
+  // exposed, and this project keeps them off — so tear down explicitly, or one
+  // test's screen is still in the document during the next one.
+  afterEach(cleanup);
 
   it('runs a round from setup through settle-up', async () => {
     const user = userEvent.setup();
@@ -92,6 +97,9 @@ describe('Birdie app', () => {
     const standings = await screen.findByRole('main');
     expect(within(standings).getByText('+$5')).toBeInTheDocument();
     expect(within(standings).getByText('-$5')).toBeInTheDocument();
+    // A skin is final the moment it's awarded, so both players' money is fully
+    // settled — nothing is riding on a later hole.
+    expect(within(standings).getAllByText('all settled')).toHaveLength(2);
 
     // Settle-up must reduce that to a single payment.
     await user.click(screen.getByRole('button', { name: 'Back' }));
@@ -100,6 +108,36 @@ describe('Birdie app', () => {
 
     await screen.findByText('1 payment');
     expect(screen.getByText('Jill pays Jack')).toBeInTheDocument();
+  });
+
+  it('can leave a round mid-way and come back to it', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await screen.findByText('No rounds yet');
+    await user.click(screen.getByRole('button', { name: 'New round' }));
+    await screen.findByText('Step 1 of 3 · Course');
+    await user.click(screen.getByRole('button', { name: /Next — players/ }));
+
+    await screen.findByText('Step 2 of 3 · Tap in tee order');
+    await user.type(screen.getByPlaceholderText('Name'), 'Ann');
+    await user.click(screen.getByRole('button', { name: 'Add player' }));
+    await user.type(screen.getByPlaceholderText('Name'), 'Ben');
+    await user.click(screen.getByRole('button', { name: 'Add player' }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Next — bets/ })).toBeEnabled(),
+    );
+    await user.click(screen.getByRole('button', { name: /Next — bets/ }));
+    await user.click(await screen.findByRole('button', { name: /Start round/ }));
+
+    // Installed to the home screen there is no browser back button, so the only
+    // way out of an unfinished round is the one the app draws.
+    await screen.findByText('Hole');
+    await user.click(screen.getByRole('button', { name: '‹ Rounds' }));
+
+    expect(await screen.findByText('In progress')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Pine Meadow Links/ }));
+    expect(await screen.findByText('Hole')).toBeInTheDocument();
   });
 
   it('persists a round across a reload', async () => {

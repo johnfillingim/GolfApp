@@ -1,6 +1,7 @@
 import { Button, Card, MoneyText, Screen } from '../components/ui';
 import {
   balanceOf,
+  formatSigned,
   nassauMembers,
   segmentLabel,
   type Bet,
@@ -48,7 +49,9 @@ export function StandingsView({
                   <span className="block text-caption text-text-secondary tnum">
                     {settled === projected
                       ? 'all settled'
-                      : `${settled >= 0 ? '+' : ''}$${Math.abs(settled / 100).toFixed(2)} locked in`}
+                      : settled === 0
+                        ? 'nothing locked in yet'
+                        : `${formatSigned(settled)} locked in`}
                   </span>
                 </span>
                 <MoneyText cents={projected} signed size="lg" />

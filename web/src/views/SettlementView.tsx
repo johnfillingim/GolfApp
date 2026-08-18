@@ -15,10 +15,12 @@ import type { RoundSession } from '../state/useRoundSession';
 export function SettlementView({
   session,
   onBack,
+  onExit,
   onFinish,
 }: {
   session: RoundSession;
   onBack: () => void;
+  onExit: () => void;
   onFinish: () => void;
 }) {
   const { transfers, settledBalances, projectedBalances, snapshot, isComplete } = session;
@@ -40,7 +42,12 @@ export function SettlementView({
           <Button size="lg" onClick={onFinish} disabled={!isComplete}>
             {isComplete ? 'Finish round' : 'Finish (scores still open)'}
           </Button>
-        ) : undefined
+        ) : (
+          // A finished round has no Finish button, so it needs its own way out.
+          <Button size="lg" variant="secondary" onClick={onExit}>
+            Back to rounds
+          </Button>
+        )
       }
     >
       <div className="p-4 space-y-6">

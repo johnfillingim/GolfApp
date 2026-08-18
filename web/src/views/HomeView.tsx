@@ -2,15 +2,12 @@ import { Button, Card, EmptyState, MoneyText, Screen } from '../components/ui';
 import { courseInfoFrom } from '../data/courses';
 import { holesStarted, type StoredRound } from '../data/model';
 import {
-  detectMilestones as _unusedMilestones,
+  balanceOf,
   evaluateAll,
   makeSnapshot,
   netBalances,
-  balanceOf,
   type PlayerID,
 } from '../scoring';
-
-void _unusedMilestones;
 
 /**
  * The opening screen: resume what's in progress, or start something new.
