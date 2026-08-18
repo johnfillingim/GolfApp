@@ -49,7 +49,12 @@ export type BetDetail =
   | { type: 'skins'; value: SkinsEvaluation }
   | { type: 'matchPlay'; value: MatchPlayEvaluation }
   | { type: 'wolf'; value: WolfEvaluation }
-  | { type: 'strokePlay'; value: StrokePlayEvaluation };
+  | { type: 'strokePlay'; value: StrokePlayEvaluation }
+  | { type: 'points'; value: PointsEvaluation }
+  | { type: 'snake'; value: SnakeEvaluation }
+  | { type: 'vegas'; value: VegasEvaluation }
+  | { type: 'segments'; value: SegmentsEvaluation }
+  | { type: 'junk'; value: JunkEvaluation };
 
 // MARK: - Scoring events
 
@@ -233,4 +238,66 @@ export interface StrokePlayEvaluation {
   rows: StrokePlayRow[];
   pot: Money;
   isFinal: boolean;
+}
+
+/** Shared shape for the points formats (Nine Point, Split Sixes, Quota). */
+export interface PointsEvaluation {
+  rows: { player: PlayerID; points: number }[];
+  holesCounted: number;
+}
+
+export interface SnakePass {
+  hole: number;
+  /** Who picked the snake up on this hole. */
+  player: PlayerID;
+  putts: number;
+}
+
+export interface SnakeEvaluation {
+  passes: SnakePass[];
+  /** Whoever is stuck with it right now; null if nobody has three-putted. */
+  holder: PlayerID | null;
+  /** What the holder currently owes each other player. */
+  valuePerPlayer: Money;
+  /** True once every hole is scored, so the holder can no longer change. */
+  isFinal: boolean;
+}
+
+export interface VegasHoleLine {
+  hole: number;
+  /** null when the hole isn't fully scored yet. */
+  numberA: number | null;
+  numberB: number | null;
+  /** Positive = side A gained that many points. */
+  swing: number;
+  /** A flip fired against the named side because the other side birdied. */
+  flipped: 'a' | 'b' | null;
+}
+
+export interface VegasEvaluation {
+  holes: VegasHoleLine[];
+  /** Cumulative points, side A's perspective. */
+  totalSwing: number;
+}
+
+/** For formats built from several independent sub-matches (Sixes, Scotch). */
+export interface SegmentLine {
+  label: string;
+  holes: number[];
+  /** Who is on each side for this segment. */
+  sideA: PlayerID[];
+  sideB: PlayerID[];
+  status: string;
+  /** Positive = side A leads. */
+  margin: number;
+  isSettled: boolean;
+}
+
+export interface SegmentsEvaluation {
+  segments: SegmentLine[];
+}
+
+export interface JunkEvaluation {
+  claims: { hole: number; kind: string; player: PlayerID; amount: Money }[];
+  counts: Record<PlayerID, number>;
 }

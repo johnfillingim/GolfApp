@@ -107,7 +107,15 @@ export type BetKind =
   | { type: 'skins'; config: SkinsConfig }
   | { type: 'matchPlay'; config: MatchPlayConfig }
   | { type: 'wolf'; config: WolfConfig }
-  | { type: 'strokePlay'; config: StrokePlayConfig };
+  | { type: 'strokePlay'; config: StrokePlayConfig }
+  | { type: 'snake'; config: SnakeConfig }
+  | { type: 'vegas'; config: VegasConfig }
+  | { type: 'ninePoint'; config: NinePointConfig }
+  | { type: 'sixes'; config: SixesConfig }
+  | { type: 'splitSixes'; config: SplitSixesConfig }
+  | { type: 'scotch'; config: ScotchConfig }
+  | { type: 'junk'; config: JunkConfig }
+  | { type: 'quota'; config: QuotaConfig };
 
 export type BetType = BetKind['type'];
 
@@ -123,6 +131,22 @@ export function betDisplayName(kind: BetKind): string {
       return 'Wolf';
     case 'strokePlay':
       return 'Stroke Play';
+    case 'snake':
+      return 'Snake';
+    case 'vegas':
+      return 'Vegas';
+    case 'ninePoint':
+      return 'Nine Point';
+    case 'sixes':
+      return 'Sixes';
+    case 'splitSixes':
+      return 'Split Sixes';
+    case 'scotch':
+      return 'Scotch';
+    case 'junk':
+      return 'Junk';
+    case 'quota':
+      return 'Quota';
   }
 }
 
@@ -138,6 +162,22 @@ export function betParticipants(kind: BetKind): PlayerID[] {
     case 'wolf':
       return [...kind.config.rotation];
     case 'strokePlay':
+      return [...kind.config.players];
+    case 'snake':
+      return [...kind.config.players];
+    case 'vegas':
+      return [...kind.config.sideA, ...kind.config.sideB];
+    case 'ninePoint':
+      return [...kind.config.players];
+    case 'sixes':
+      return [...kind.config.players];
+    case 'splitSixes':
+      return [...kind.config.players];
+    case 'scotch':
+      return [...kind.config.sideA, ...kind.config.sideB];
+    case 'junk':
+      return [...kind.config.players];
+    case 'quota':
       return [...kind.config.players];
   }
 }
@@ -304,4 +344,225 @@ export interface StrokePlayConfig {
   handicapMode: HandicapMode;
   /** See `SkinsConfig.firstHole`. */
   firstHole?: number | null;
+}
+
+// MARK: Snake
+
+/**
+ * The three-putt penalty. Whoever three-putts most recently is "holding the
+ * snake"; it passes to the next player who three-putts, and whoever is left
+ * holding it at the end of the round pays out.
+ *
+ * Money: the holder pays `stakePerPlayer` to every other participant. With
+ * `growPerPass` on, the pot grows by the base stake each time the snake changes
+ * hands — the usual "it gets expensive late" house rule.
+ *
+ * This is the one format that needs putts, not just strokes. Holes with no putt
+ * count entered simply can't move the snake.
+ */
+export interface SnakeConfig {
+  players: PlayerID[];
+  stakePerPlayer: Money;
+  /** Putts on a hole at or above this count pass the snake. Classically 3. */
+  threePuttThreshold: number;
+  growPerPass: boolean;
+  firstHole?: number | null;
+}
+
+// MARK: Vegas
+
+/**
+ * Two-on-two, where each side's hole score is its two scores read as a single
+ * number — low digit first. A 4 and a 6 make 46. The difference between the two
+ * numbers is the points swing, paid at `stakePerPoint`.
+ *
+ * `flipOnBirdie`: when a side makes birdie or better, the *opponent's* number is
+ * flipped (65 instead of 56), which is what makes Vegas swing so violently.
+ * Scores of 10+ are appended rather than concatenated as a digit, the standard
+ * convention (a 10 and a 4 make 410).
+ */
+export interface VegasConfig {
+  sideA: PlayerID[];
+  sideB: PlayerID[];
+  stakePerPoint: Money;
+  handicapMode: HandicapMode;
+  allowance: HandicapAllowance;
+  flipOnBirdie: boolean;
+  firstHole?: number | null;
+}
+
+// MARK: Nine Point
+
+/**
+ * Three-player game splitting nine points a hole: 5 to the best score, 3 to the
+ * middle, 1 to the worst. Ties pool the points they cover and split them, so the
+ * hole always distributes exactly nine (5/3/1 → 4/4/1 for a tie at the top,
+ * 5/2/2 at the bottom, 3/3/3 all square).
+ *
+ * Money settles pairwise on point differences at `pointValue` each, which keeps
+ * the books zero-sum without needing a pot.
+ */
+export interface NinePointConfig {
+  players: PlayerID[];
+  pointValue: Money;
+  handicapMode: HandicapMode;
+  firstHole?: number | null;
+}
+
+// MARK: Sixes
+
+/**
+ * Four players, three partnerships, six holes each — "round robin". Partners
+ * rotate every six holes so everyone plays with everyone: A+B vs C+D, then
+ * A+C vs B+D, then A+D vs B+C.
+ *
+ * Each six-hole segment is its own best-ball match at `stakePerPlayer`, settled
+ * per man exactly like a Nassau segment.
+ */
+export interface SixesConfig {
+  /** Exactly four players, in tee order; the rotation is derived from this. */
+  players: PlayerID[];
+  stakePerPlayer: Money;
+  handicapMode: HandicapMode;
+  allowance: HandicapAllowance;
+}
+
+// MARK: Split Sixes
+
+/**
+ * Three-player game splitting six points a hole: 4 to the best, 2 to the middle,
+ * 0 to the worst. Ties pool and split as in Nine Point (3/3/0 tied at the top,
+ * 4/1/1 tied at the bottom, 2/2/2 all square).
+ */
+export interface SplitSixesConfig {
+  players: PlayerID[];
+  pointValue: Money;
+  handicapMode: HandicapMode;
+  firstHole?: number | null;
+}
+
+// MARK: Scotch
+
+/**
+ * Team points per hole, also called Umbrella or Bridge. Each hole awards a point
+ * for low ball (best individual score), a point for low total (combined), and a
+ * point for a birdie or better. Ties on a category award nobody.
+ *
+ * `doubleOnSweep`: taking every available category doubles the hole, the
+ * "umbrella" that gives the game its other name.
+ */
+export interface ScotchConfig {
+  sideA: PlayerID[];
+  sideB: PlayerID[];
+  pointValue: Money;
+  handicapMode: HandicapMode;
+  allowance: HandicapAllowance;
+  doubleOnSweep: boolean;
+  firstHole?: number | null;
+}
+
+// MARK: Junk
+
+/** The side-bet achievements, each worth the stake from every other player. */
+export type JunkKind =
+  /** On the green in regulation on a par 3. */
+  | 'greenie'
+  /** Up and down from a bunker. */
+  | 'sandy'
+  /** Par or better after hitting a tree. */
+  | 'barkie'
+  /** Holed from off the green. */
+  | 'chipIn'
+  /** Made a putt longer than the flagstick. */
+  | 'poley'
+  /** Longest drive on the hole. */
+  | 'longDrive'
+  /** Closest to the pin on a par 3. */
+  | 'closestToPin';
+
+export const JUNK_KINDS: JunkKind[] = [
+  'greenie',
+  'sandy',
+  'barkie',
+  'chipIn',
+  'poley',
+  'longDrive',
+  'closestToPin',
+];
+
+export function junkLabel(kind: JunkKind): string {
+  switch (kind) {
+    case 'greenie':
+      return 'Greenie';
+    case 'sandy':
+      return 'Sandy';
+    case 'barkie':
+      return 'Barkie';
+    case 'chipIn':
+      return 'Chip-in';
+    case 'poley':
+      return 'Poley';
+    case 'longDrive':
+      return 'Long drive';
+    case 'closestToPin':
+      return 'Closest to pin';
+  }
+}
+
+/**
+ * The grab-bag of one-off achievements. Unlike every other format these can't be
+ * derived from a scorecard — somebody has to say "that was a sandy" — so they
+ * arrive as append-only claim events, the same conflict-free shape as Wolf picks.
+ */
+export interface JunkConfig {
+  players: PlayerID[];
+  /** Paid by every other participant, per claim. */
+  stakePerItem: Money;
+  /** Which achievements this group plays for. */
+  enabled: JunkKind[];
+  firstHole?: number | null;
+}
+
+/** One claimed piece of junk. Identity is (bet, hole, kind, player). */
+export interface JunkClaim {
+  betID: string;
+  hole: number;
+  kind: JunkKind;
+  player: PlayerID;
+}
+
+export function junkClaimID(claim: JunkClaim): string {
+  return `${claim.betID}|${claim.hole}|${claim.kind}|${claim.player}`;
+}
+
+// MARK: Quota
+
+/**
+ * Points against a target. Each player's quota is `quotaBase` minus their
+ * playing handicap (36 for 18 holes is the standard), and they earn Stableford-
+ * style points per hole. Finishing over quota is what pays.
+ *
+ * Money settles pairwise on the difference between players' over/under figures
+ * at `pointValue` each.
+ */
+export interface QuotaConfig {
+  players: PlayerID[];
+  pointValue: Money;
+  /** Target before handicap; 36 over 18 holes, 18 over 9. */
+  quotaBase: number;
+  firstHole?: number | null;
+}
+
+/**
+ * Stableford-style points for a gross score against par: bogey 1, par 2,
+ * birdie 4, eagle 6, albatross or better 8. Double bogey and worse score none.
+ */
+export function quotaPoints(strokes: number, par: number): number {
+  const toPar = strokes - par;
+  if (toPar <= -3) return 8;
+  if (toPar === -2) return 6;
+  if (toPar === -1) return 4;
+  if (toPar === 0) return 2;
+  if (toPar === 1) return 1;
+  return 0;
 }

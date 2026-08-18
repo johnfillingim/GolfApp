@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Button, Card, MoneyText } from '../components/ui';
+import { JunkRow, PuttsRow } from './HoleExtras';
 import { balanceOf, holeAt, type PlayerID } from '../scoring';
 import type { RoundSession } from '../state/useRoundSession';
 
@@ -39,12 +40,14 @@ export function LiveRoundView({
   onOpenScorecard,
   onOpenStandings,
   onOpenSettle,
+  onOpenRecap,
 }: {
   session: RoundSession;
   onExit: () => void;
   onOpenScorecard: () => void;
   onOpenStandings: () => void;
   onOpenSettle: () => void;
+  onOpenRecap: () => void;
 }) {
   const { round, snapshot, currentHole, setCurrentHole } = session;
   const holes = round.holeNumbers;
@@ -181,17 +184,22 @@ export function LiveRoundView({
           );
         })}
 
+        <PuttsRow session={session} hole={currentHole} />
+        <JunkRow session={session} hole={currentHole} />
         <BetHeadlines session={session} />
       </main>
 
       <footer className="safe-bottom px-4 pt-3 border-t border-stroke shrink-0 flex gap-2">
-        <Button variant="secondary" onClick={onOpenScorecard} className="flex-1">
+        <Button variant="secondary" onClick={onOpenScorecard} className="flex-1 px-2">
           Card
         </Button>
-        <Button variant="secondary" onClick={onOpenStandings} className="flex-1">
-          Standings
+        <Button variant="secondary" onClick={onOpenStandings} className="flex-1 px-2">
+          Money
         </Button>
-        <Button variant="secondary" onClick={onOpenSettle} className="flex-1">
+        <Button variant="secondary" onClick={onOpenRecap} className="flex-1 px-2">
+          Recap
+        </Button>
+        <Button variant="secondary" onClick={onOpenSettle} className="flex-1 px-2">
           Settle
         </Button>
       </footer>

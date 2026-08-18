@@ -218,7 +218,11 @@ export function NewRoundFlow({
           </>
         )}
 
-        <BetBuilder players={players} onAdd={(bet) => setBets([...bets, bet])} />
+        <BetBuilder
+          players={players}
+          holeCount={holeNumbers.length}
+          onAdd={(bet) => setBets([...bets, bet])}
+        />
       </div>
     </Screen>
   );

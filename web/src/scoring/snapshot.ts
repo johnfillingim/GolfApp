@@ -1,5 +1,7 @@
+import { junkClaimID } from './types';
 import type {
   CourseInfo,
+  JunkClaim,
   PlayerID,
   PressEvent,
   ScoringPlayer,
@@ -15,10 +17,12 @@ import type {
 export interface RoundEvents {
   presses: PressEvent[];
   wolfDecisions: WolfDecision[];
+  /** Claimed junk (greenies, sandies…), identified by bet+hole+kind+player. */
+  junkClaims: JunkClaim[];
 }
 
 export function emptyEvents(): RoundEvents {
-  return { presses: [], wolfDecisions: [] };
+  return { presses: [], wolfDecisions: [], junkClaims: [] };
 }
 
 /** Set-union merge by event identity. */
@@ -35,7 +39,13 @@ export function unionEvents(a: RoundEvents, b: RoundEvents): RoundEvents {
       wolfDecisions.push(decision);
     }
   }
-  return { presses, wolfDecisions };
+  const junkClaims = [...(a.junkClaims ?? [])];
+  for (const claim of b.junkClaims ?? []) {
+    if (!junkClaims.some((c) => junkClaimID(c) === junkClaimID(claim))) {
+      junkClaims.push(claim);
+    }
+  }
+  return { presses, wolfDecisions, junkClaims };
 }
 
 /**
@@ -62,6 +72,12 @@ export interface RoundSnapshot {
    */
   scores: Record<PlayerID, Record<number, number>>;
   /**
+   * Putts taken: playerID → (hole number → putts). Only the Snake needs these,
+   * and only when the group bothers to record them — absence means "unknown",
+   * which is why an unputted hole can never move the snake.
+   */
+  putts?: Record<PlayerID, Record<number, number>>;
+  /**
    * playerID → last hole through which the player is active. A player with
    * `withdrawals[p] === 6` counts for holes 1–6 and is out from hole 7 on.
    * `0` means they never started. Absent = never withdrew.
@@ -75,6 +91,7 @@ export interface SnapshotInit {
   players: ScoringPlayer[];
   holeNumbers?: number[];
   scores?: Record<PlayerID, Record<number, number>>;
+  putts?: Record<PlayerID, Record<number, number>>;
   withdrawals?: Record<PlayerID, number>;
   events?: RoundEvents;
 }
@@ -88,6 +105,7 @@ export function makeSnapshot(init: SnapshotInit): RoundSnapshot {
     players: init.players,
     holeNumbers,
     scores: init.scores ?? {},
+    putts: init.putts ?? {},
     withdrawals: init.withdrawals ?? {},
     events: init.events ?? emptyEvents(),
   };

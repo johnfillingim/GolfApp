@@ -22,5 +22,7 @@ export * from './evaluator';
 export * from './settlement';
 export * from './roundMerge';
 export * from './milestones';
+export * from './narrative';
+export * from './pointsSupport';
 export * from './betSummary';
 export { sideName, shortName } from './engineSupport';

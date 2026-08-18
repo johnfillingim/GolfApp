@@ -1,4 +1,5 @@
 import { describeMoney } from './money';
+import { junkLabel } from './types';
 import type {
   Bet,
   HandicapAllowance,
@@ -90,6 +91,71 @@ export function describeBet(bet: Bet, players: ScoringPlayer[]): string {
       return (
         `${capitalize(scoringText(config.handicapMode))} stroke play, ${describeMoney(config.ante)} each — ` +
         `${list(config.players)}. Low round takes the ${describeMoney(pot)} pot; ties split.`
+      );
+    }
+
+    case 'snake': {
+      const config = bet.kind.config;
+      let text = `Snake at ${describeMoney(config.stakePerPlayer)} — ${list(config.players)}. `;
+      text += `A ${config.threePuttThreshold}-putt hands it over; whoever holds it at the end pays everyone.`;
+      if (config.growPerPass) text += ' The value grows on every pass.';
+      return text;
+    }
+
+    case 'vegas': {
+      const config = bet.kind.config;
+      let text = `Vegas at ${describeMoney(config.stakePerPoint)} a point, ${scoringText(config.handicapMode, config.allowance)} — `;
+      text += `${list(config.sideA)} vs ${list(config.sideB)}. Scores pair into one number, low digit first.`;
+      if (config.flipOnBirdie) text += ' A birdie flips the other side’s number.';
+      return text;
+    }
+
+    case 'ninePoint': {
+      const config = bet.kind.config;
+      return (
+        `Nine Point at ${describeMoney(config.pointValue)} a point, ${scoringText(config.handicapMode)} — ` +
+        `${list(config.players)}. Five for the best score each hole, three for the middle, one for the worst; ties split.`
+      );
+    }
+
+    case 'sixes': {
+      const config = bet.kind.config;
+      return (
+        `Sixes at ${describeMoney(config.stakePerPlayer)} a segment, ${scoringText(config.handicapMode, config.allowance)} — ` +
+        `${list(config.players)}. Partners rotate every six holes so everyone plays with everyone.`
+      );
+    }
+
+    case 'splitSixes': {
+      const config = bet.kind.config;
+      return (
+        `Split Sixes at ${describeMoney(config.pointValue)} a point, ${scoringText(config.handicapMode)} — ` +
+        `${list(config.players)}. Four for the best score each hole, two for the middle, none for the worst; ties split.`
+      );
+    }
+
+    case 'scotch': {
+      const config = bet.kind.config;
+      let text = `Scotch at ${describeMoney(config.pointValue)} a point, ${scoringText(config.handicapMode, config.allowance)} — `;
+      text += `${list(config.sideA)} vs ${list(config.sideB)}. A point each for low ball, low total, and a birdie.`;
+      if (config.doubleOnSweep) text += ' Sweeping the hole doubles it.';
+      return text;
+    }
+
+    case 'junk': {
+      const config = bet.kind.config;
+      const items = config.enabled.map(junkLabel).join(', ');
+      return (
+        `Junk at ${describeMoney(config.stakePerItem)} from each player — ${list(config.players)}. ` +
+        `Playing for: ${items || 'nothing selected yet'}.`
+      );
+    }
+
+    case 'quota': {
+      const config = bet.kind.config;
+      return (
+        `Quota at ${describeMoney(config.pointValue)} a point — ${list(config.players)}. ` +
+        `Everyone starts at ${config.quotaBase} minus their handicap and earns points per hole; how far over or under you finish is what pays.`
       );
     }
   }

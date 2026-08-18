@@ -32,6 +32,7 @@ const players = (): ScoringPlayer[] => [jack(), jill(), bob(), sue()];
 const withDecisions = (decisions: WolfDecision[]): RoundEvents => ({
   presses: [],
   wolfDecisions: decisions,
+  junkClaims: [],
 });
 
 function wolfDetail(evaluation: BetEvaluation): WolfEvaluation {

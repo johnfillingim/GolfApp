@@ -4,6 +4,7 @@ import { useWakeLock } from '../hooks/useWakeLock';
 import type { StoredRound } from '../data/model';
 import { useRoundSession } from '../state/useRoundSession';
 import { LiveRoundView } from './LiveRoundView';
+import { RecapView } from './RecapView';
 import { ScorecardView } from './ScorecardView';
 import { SettlementView } from './SettlementView';
 import { StandingsView } from './StandingsView';
@@ -16,7 +17,7 @@ import { StandingsView } from './StandingsView';
  * or replays celebrations.
  */
 
-type Tab = 'play' | 'card' | 'standings' | 'settle';
+type Tab = 'play' | 'card' | 'standings' | 'settle' | 'recap';
 
 export function RoundContainer({
   round,
@@ -44,11 +45,13 @@ export function RoundContainer({
           onOpenScorecard={() => setTab('card')}
           onOpenStandings={() => setTab('standings')}
           onOpenSettle={() => setTab('settle')}
+          onOpenRecap={() => setTab('recap')}
         />
       )}
       {tab === 'card' && (
         <ScorecardView session={session} onBack={() => setTab('play')} />
       )}
+      {tab === 'recap' && <RecapView session={session} onBack={() => setTab('play')} />}
       {tab === 'standings' && (
         <StandingsView session={session} onBack={() => setTab('play')} />
       )}

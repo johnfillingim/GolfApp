@@ -93,7 +93,7 @@ describe('Birdie app', () => {
     if (dismiss) await user.click(dismiss);
 
     // Standings must show Jack +$5 / Jill −$5.
-    await user.click(screen.getByRole('button', { name: 'Standings' }));
+    await user.click(screen.getByRole('button', { name: 'Money' }));
     const standings = await screen.findByRole('main');
     expect(within(standings).getByText('+$5')).toBeInTheDocument();
     expect(within(standings).getByText('-$5')).toBeInTheDocument();
@@ -138,6 +138,53 @@ describe('Birdie app', () => {
     expect(await screen.findByText('In progress')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /Pine Meadow Links/ }));
     expect(await screen.findByText('Hole')).toBeInTheDocument();
+  });
+
+  it('plays a new-format bet and tells the story in the recap', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await screen.findByText('No rounds yet');
+    await user.click(screen.getByRole('button', { name: 'New round' }));
+    await screen.findByText('Step 1 of 3 · Course');
+    await user.click(screen.getByRole('button', { name: /Next — players/ }));
+
+    await screen.findByText('Step 2 of 3 · Tap in tee order');
+    await user.type(screen.getByPlaceholderText('Name'), 'Ida');
+    await user.click(screen.getByRole('button', { name: 'Add player' }));
+    await user.type(screen.getByPlaceholderText('Name'), 'Ken');
+    await user.click(screen.getByRole('button', { name: 'Add player' }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Next — bets/ })).toBeEnabled(),
+    );
+    await user.click(screen.getByRole('button', { name: /Next — bets/ }));
+
+    // Junk is the format that can't be derived from a scorecard, so it exercises
+    // the claim path end to end.
+    await screen.findByText('Step 3 of 3 · Agree before you tee off');
+    await user.click(screen.getByRole('button', { name: /^Junk/ }));
+    await user.click(screen.getByRole('button', { name: '$5' }));
+    await user.click(screen.getByRole('button', { name: 'Add bet' }));
+    expect(await screen.findByText(/Junk at \$5\.00 from each player/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Start round/ }));
+    await screen.findByText('Hole');
+
+    // Claim a greenie for Ida on hole 1.
+    const greenieLabel = await screen.findByText('Greenie');
+    const greenieRow = greenieLabel.parentElement!;
+    await user.click(within(greenieRow).getByRole('button', { name: /Ida/ }));
+
+    // Ken pays Ida $5.
+    await user.click(screen.getByRole('button', { name: 'Money' }));
+    const standings = await screen.findByRole('main');
+    expect(within(standings).getByText('+$5')).toBeInTheDocument();
+
+    // And the recap says so in words.
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    await screen.findByText('Hole');
+    await user.click(screen.getByRole('button', { name: 'Recap' }));
+    expect(await screen.findByText(/Ida claimed a greenie on 1\./)).toBeInTheDocument();
   });
 
   it('persists a round across a reload', async () => {

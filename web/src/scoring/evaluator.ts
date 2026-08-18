@@ -1,6 +1,11 @@
 import type { BetEvaluation } from './evaluation';
 import { totalCents } from './money';
+import { evaluateJunk } from './junkEngine';
 import { evaluateMatchPlay } from './matchPlayEngine';
+import { evaluateNinePoint, evaluateQuota, evaluateSplitSixes } from './pointsEngines';
+import { evaluateScotch, evaluateSixes } from './teamEngines';
+import { evaluateSnake } from './snakeEngine';
+import { evaluateVegas } from './vegasEngine';
 import { evaluateNassau } from './nassauEngine';
 import { evaluateSkins } from './skinsEngine';
 import { evaluateStrokePlay } from './strokePlayEngine';
@@ -53,6 +58,30 @@ export function evaluateBet(bet: Bet, snapshot: RoundSnapshot): BetEvaluation {
       break;
     case 'strokePlay':
       evaluation = evaluateStrokePlay(bet, bet.kind.config, snapshot);
+      break;
+    case 'snake':
+      evaluation = evaluateSnake(bet, bet.kind.config, snapshot);
+      break;
+    case 'vegas':
+      evaluation = evaluateVegas(bet, bet.kind.config, snapshot);
+      break;
+    case 'ninePoint':
+      evaluation = evaluateNinePoint(bet, bet.kind.config, snapshot);
+      break;
+    case 'sixes':
+      evaluation = evaluateSixes(bet, bet.kind.config, snapshot);
+      break;
+    case 'splitSixes':
+      evaluation = evaluateSplitSixes(bet, bet.kind.config, snapshot);
+      break;
+    case 'scotch':
+      evaluation = evaluateScotch(bet, bet.kind.config, snapshot);
+      break;
+    case 'junk':
+      evaluation = evaluateJunk(bet, bet.kind.config, snapshot);
+      break;
+    case 'quota':
+      evaluation = evaluateQuota(bet, bet.kind.config, snapshot);
       break;
   }
 

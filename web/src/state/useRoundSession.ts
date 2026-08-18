@@ -9,6 +9,7 @@ import {
   type Bet,
   type BetEvaluation,
   type Balances,
+  type JunkKind,
   type MatchSide,
   type Milestone,
   type NassauSegment,
@@ -93,6 +94,19 @@ export interface RoundSession {
 
   pendingWolfDecision: (hole: number) => { bet: Bet; wolf: ScoringPlayer } | null;
 
+  toggleJunkClaim: (
+    betID: string,
+    hole: number,
+    kind: JunkKind,
+    player: PlayerID,
+  ) => void;
+  hasJunkClaim: (
+    betID: string,
+    hole: number,
+    kind: JunkKind,
+    player: PlayerID,
+  ) => boolean;
+
   markSettled: (transfer: Transfer, settled: boolean) => void;
   isSettled: (transfer: Transfer) => boolean;
   finishRound: () => void;
@@ -151,11 +165,26 @@ export function useRoundSession(
       scores[player.id] = byHole;
     }
 
+    // Snake is the one format that reads putts, so they ride along with the
+    // strokes rather than being a separate lookup.
+    const putts: Record<PlayerID, Record<number, number>> = {};
+    for (const player of round.players) {
+      const byHole: Record<number, number> = {};
+      const entries = round.scores[player.id] ?? {};
+      for (const holeKey of Object.keys(entries)) {
+        const hole = Number(holeKey);
+        const value = entries[hole]?.putts;
+        if (value != null) byHole[hole] = value;
+      }
+      putts[player.id] = byHole;
+    }
+
     return makeSnapshot({
       course: courseInfoFrom(round.course),
       players,
       holeNumbers: round.holeNumbers,
       scores,
+      putts,
       withdrawals: round.withdrawals,
       events: round.events,
     });
@@ -392,6 +421,40 @@ export function useRoundSession(
     [],
   );
 
+  const toggleJunkClaim = useCallback(
+    (betID: string, hole: number, kind: JunkKind, player: PlayerID) => {
+      setRound((current) => {
+        const claims = current.events.junkClaims ?? [];
+        const existing = claims.find(
+          (c) =>
+            c.betID === betID &&
+            c.hole === hole &&
+            c.kind === kind &&
+            c.player === player,
+        );
+        return {
+          ...current,
+          events: {
+            ...current.events,
+            junkClaims: existing
+              ? claims.filter((c) => c !== existing)
+              : [...claims, { betID, hole, kind, player }],
+          },
+        };
+      });
+    },
+    [],
+  );
+
+  const hasJunkClaim = useCallback(
+    (betID: string, hole: number, kind: JunkKind, player: PlayerID) =>
+      (round.events.junkClaims ?? []).some(
+        (c) =>
+          c.betID === betID && c.hole === hole && c.kind === kind && c.player === player,
+      ),
+    [round.events.junkClaims],
+  );
+
   const withdraw = useCallback((player: PlayerID, afterHole: number) => {
     setRound((current) => {
       const existing = current.withdrawals[player];
@@ -498,6 +561,8 @@ export function useRoundSession(
     withdraw,
     addBet,
     pendingWolfDecision,
+    toggleJunkClaim,
+    hasJunkClaim,
     markSettled,
     isSettled,
     finishRound,

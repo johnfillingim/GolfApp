@@ -75,8 +75,9 @@ function evaluate(lastHole = 18, manualPress = true): BetEvaluation {
           },
         ],
         wolfDecisions: [],
+        junkClaims: [],
       }
-    : { presses: [], wolfDecisions: [] };
+    : { presses: [], wolfDecisions: [], junkClaims: [] };
   const snap = snapshot({
     players: [jack(), jill()],
     scores: {
