@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Birdie">
+  <rect width="512" height="512" fill="#0A0F0D"/>
+  <circle cx="256" cy="256" r="236" fill="#1F9D55"/>
+  <polygon points="269,118 371,154 269,205" fill="#B7F435"/>
+  <rect x="253" y="102" width="16" height="266" rx="8" fill="#F4F9F6"/>
+  <circle cx="261" cy="371" r="17" fill="#0A1F14"/>
+  <circle cx="169" cy="323" r="38" fill="#F4F9F6"/>
+</svg>

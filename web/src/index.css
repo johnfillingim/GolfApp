@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-text-primary font-rounded;
+    /* Score entry is a lot of rapid tapping; text selection and the iOS
+       double-tap zoom both get in the way. */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior-y: none;
+  }
+
+  /* Numbers in motion: tabular figures so steppers and money columns don't
+     jitter as digits change. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  button {
+    @apply select-none;
+    touch-action: manipulation;
+  }
+
+  input,
+  select {
+    @apply select-text;
+  }
+}
+
+@layer components {
+  .safe-top {
+    padding-top: max(env(safe-area-inset-top), 0.5rem);
+  }
+
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+
+  .card {
+    @apply bg-surface border border-stroke rounded-card;
+  }
+
+  .card-raised {
+    @apply bg-raised border border-stroke rounded-card;
+  }
+
+  /* Every interactive control clears the 48px gloved-thumb minimum. */
+  .tap {
+    @apply min-h-target min-w-target;
+  }
+}
+
+/* Respect the OS reduce-motion setting: particles and springs drop to fades,
+   matching the accessibility behavior of the SwiftUI overlay. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
